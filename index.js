@@ -3,6 +3,8 @@
 var vTL=2.5; var vTU=2.5; var vCL=95
 var pickleRadius = 50
 var biteR = 100
+var lowerLimit ="0.00"
+var upperLimit ="100.00"
 
 function BinP(N,p,x1,x2) {
     var q=p/(1-p); var k=0; var v = 1; var s=0; var tot=0
@@ -23,22 +25,23 @@ function Fmt(x) {
 }
 
 function CalculateBin(a,b) {
-    var vx = a
-    var vN = b
+    var vx = eval(a)
+    var vN = eval(b)
     var vP = vx/vN
     var probability = Fmt(vP)
-    var lowerLimit ="0.00"
-    var upperLimit ="100.00"
-    if(vx==0)
+
+    if(vx===0)
     { lowerLimit = "0.0000" } else
     { var v=vP/2; vsL=0; vsH=vP; var p=vTL/100
         while((vsH-vsL)>1e-5) { if(BinP(vN,v,vx,vN)>p) { vsH=v; v=(vsL+v)/2 } else { vsL=v; v=(v+vsH)/2 } }
         lowerLimit = Fmt(v) }
-    if(vx==vN)
+    if(vx===vN)
     { upperLimit = "1.0000" } else
-    { var v=(1+vP)/2; vsL=vP; vsH=1; var p=vTU/100
-        while((vsH-vsL)>1e-5) { if(BinP(vN,v,0,vx)<p) { vsH=v; v=(vsL+v)/2 } else { vsL=v; v=(v+vsH)/2 } }
-        upperLimit = Fmt(v) }
+    { var vv=(1+vP)/2; vsL=vP; vsH=1; var p=vTU/100
+        while((vsH-vsL)>1e-5) { if(BinP(vN,vv,0,vx)<p) { vsH=vv; vv=(vsL+vv)/2 } else { vsL=vv; vv=(vv+vsH)/2 } }
+        upperLimit = Fmt(vv) }
+
+
 
     return([probability, lowerLimit, upperLimit])
 }
@@ -125,31 +128,18 @@ function runTrials(numberOfTrials){
     }
     console.log("trial successes")
     console.log(trialSuccesses)
+    console.log(numberOfTrials)
     console.log(CalculateBin(trialSuccesses,numberOfTrials))
     var results = CalculateBin(trialSuccesses,numberOfTrials)
-        d3.select("#p>span").text(results[0]);
+    d3.select("#p>span").text(results[0]);
     d3.select("#l>span").text(results[1]);
     d3.select("#u>span").text(results[2]);
+    d3.select("#b>span").text(trialSuccesses);
 
 
 }
 
-function CalcBin(form) {
-    var vx = eval(form.x.value)
-    var vN = eval(form.N.value)
-    var vP = vx/vN
-    form.P.value = Fmt(vP)
-    if(vx==0)
-    { form.DL.value = "0.0000" } else
-    { var v=vP/2; vsL=0; vsH=vP; var p=vTL/100
-        while((vsH-vsL)>1e-5) { if(BinP(vN,v,vx,vN)>p) { vsH=v; v=(vsL+v)/2 } else { vsL=v; v=(v+vsH)/2 } }
-        form.DL.value = Fmt(v) }
-    if(vx==vN)
-    { form.DU.value = "1.0000" } else
-    { var v=(1+vP)/2; vsL=vP; vsH=1; var p=vTU/100
-        while((vsH-vsL)>1e-5) { if(BinP(vN,v,0,vx)<p) { vsH=v; v=(vsL+v)/2 } else { vsL=v; v=(v+vsH)/2 } }
-        form.DU.value = Fmt(v) }
-}
+
 
 
 function DistBetweenPoints(p1, p2) {
